@@ -1,6 +1,6 @@
 module go/restapi
 
-go 1.24.2
+go 1.24.1
 
 require github.com/gin-gonic/gin v1.10.0
 
