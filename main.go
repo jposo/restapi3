@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 
+	"slices"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -45,7 +47,7 @@ func main() {
 
 		// Add new user to the static data
 		newUserID := len(users) + 1
-		users = append(users, map[string]interface{}{
+		users = append(users, map[string]any{
 			"id":    newUserID,
 			"name":  newUser.Name,
 			"email": newUser.Email,
@@ -79,7 +81,7 @@ func main() {
 		id := c.Param("id")
 		for i, user := range users {
 			if user["id"] == id {
-				users = append(users[:i], users[i+1:]...)
+				users = slices.Delete(users, i, i+1)
 				c.JSON(http.StatusOK, gin.H{"status": "user deleted"})
 				return
 			}
