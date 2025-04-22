@@ -22,6 +22,17 @@ func main() {
 		c.JSON(http.StatusOK, users)
 	})
 
+	router.GET("/users/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		for _, user := range users {
+			if user["id"] == id {
+				c.JSON(http.StatusOK, user)
+				return
+			}
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	})
+
 	router.POST("/users", func(c *gin.Context) {
 		var newUser struct {
 			Name  string `json:"name"`
@@ -41,6 +52,39 @@ func main() {
 		})
 
 		c.JSON(http.StatusOK, gin.H{"status": "user added", "id": newUserID})
+	})
+
+	router.PUT("/users/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		var updatedUser struct {
+			Name  string `json:"name"`
+			Email string `json:"email"`
+		}
+		if err := c.ShouldBindJSON(&updatedUser); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		for i, user := range users {
+			if user["id"] == id {
+				users[i]["name"] = updatedUser.Name
+				users[i]["email"] = updatedUser.Email
+				c.JSON(http.StatusOK, gin.H{"status": "user updated"})
+				return
+			}
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+	})
+
+	router.DELETE("/users/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		for i, user := range users {
+			if user["id"] == id {
+				users = append(users[:i], users[i+1:]...)
+				c.JSON(http.StatusOK, gin.H{"status": "user deleted"})
+				return
+			}
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 	})
 
 	// Start the server
